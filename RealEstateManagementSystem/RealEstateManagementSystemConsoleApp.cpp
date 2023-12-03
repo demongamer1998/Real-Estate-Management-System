@@ -967,7 +967,7 @@ public:
 					Color::setTextColor(Color::BrightCyan);
 					cout << "] ";
 					Color::setTextColor(Color::BrightGreen);
-					cout << "Show All Availabe Property"<<endl;
+					cout << "Show All Availabe Property //Coming soon"<<endl;
 					Color::setTextColor(Color::BrightCyan);
 		            cout << "[";
 		            Color::setTextColor(Color::BrightRed);
@@ -975,7 +975,7 @@ public:
 					Color::setTextColor(Color::BrightCyan);
 					cout << "] ";
 					Color::setTextColor(Color::BrightGreen);
-					cout << "Search Property"<<endl;
+					cout << "Search Property //Coming soon"<<endl;
 					Color::setTextColor(Color::BrightCyan);
 		            cout << "[";
 		            Color::setTextColor(Color::BrightRed);
@@ -983,7 +983,7 @@ public:
 					Color::setTextColor(Color::BrightCyan);
 					cout << "] ";
 					Color::setTextColor(Color::BrightGreen);
-					cout << "Buy A Property"<<endl;
+					cout << "Buy A Property //Coming soon"<<endl;
 					Color::setTextColor(Color::BrightCyan);
 		            cout << "[";
 		            Color::setTextColor(Color::BrightRed);
@@ -991,7 +991,7 @@ public:
 					Color::setTextColor(Color::BrightCyan);
 					cout << "] ";
 					Color::setTextColor(Color::BrightGreen);
-					cout << "Edit Account"<<endl;
+					cout << "Edit Account //Coming soon"<<endl;
 					Color::setTextColor(Color::BrightCyan);
 		            cout << "[";
 		            Color::setTextColor(Color::BrightRed);
@@ -1170,7 +1170,7 @@ public:
 					Color::setTextColor(Color::BrightCyan);
 					cout << "] ";
 					Color::setTextColor(Color::BrightGreen);
-					cout << "Edit Accounts"<<endl;
+					cout << "Edit Accounts //Coming soon"<<endl;
 					Color::setTextColor(Color::BrightCyan);
 		            cout << "[";
 		            Color::setTextColor(Color::BrightRed);
@@ -1378,73 +1378,125 @@ void userLogin() {
     while (counter < 3) {
         user.login(username, password);
         if (user.isLoggedIn()) {
-            user.showProfile(); // If logged in successfully, break out of the loop
-            Color::setTextColor(Color::BrightCyan);
-            cout << "[";
-            Color::setTextColor(Color::BrightRed);
-			cout << "1";
-			Color::setTextColor(Color::BrightCyan);
-			cout << "] ";
-			Color::setTextColor(Color::BrightGreen);
-			cout << "Show All Availabe Property"<<endl;
-			Color::setTextColor(Color::BrightCyan);
-            cout << "[";
-            Color::setTextColor(Color::BrightRed);
-			cout << "2";
-			Color::setTextColor(Color::BrightCyan);
-			cout << "] ";
-			Color::setTextColor(Color::BrightGreen);
-			cout << "Search Property"<<endl;
-			Color::setTextColor(Color::BrightCyan);
-            cout << "[";
-            Color::setTextColor(Color::BrightRed);
-			cout << "3";
-			Color::setTextColor(Color::BrightCyan);
-			cout << "] ";
-			Color::setTextColor(Color::BrightGreen);
-			cout << "Buy A Property"<<endl;
-			Color::setTextColor(Color::BrightCyan);
-            cout << "[";
-            Color::setTextColor(Color::BrightRed);
-			cout << "4";
-			Color::setTextColor(Color::BrightCyan);
-			cout << "] ";
-			Color::setTextColor(Color::BrightGreen);
-			cout << "Edit Account"<<endl;
-			Color::setTextColor(Color::BrightCyan);
-            cout << "[";
-            Color::setTextColor(Color::BrightRed);
-			cout << "5";;
-			Color::setTextColor(Color::BrightCyan);
-			cout << "] ";
-			Color::setTextColor(Color::BrightGreen);
-			cout << "Logout"<<endl;
-            Color::setTextColor(Color::White);
-            Color::setTextColor(Color::Yellow);
-            int option = user.userOption(user.getId(), user.getUsername(), user.getPassword());
-            
-            switch(option){
-            	case 1:
-            		cout<<"Show All Availabe Property"<<endl;
-            		break;
-            	case 2:
-            		cout<<"Search Property"<<endl;
-            		break;
-            	case 3:
-            		cout<<"Buy A Property"<<endl;
-            		break;
-            	case 4:
-            		cout<<"Edit Account"<<endl;
-            		break;
-            	case 5:
-            		system("cls");
-            		user.logout();
-            		main();
-            		break;
-        		default:
-        			break;
+        	bool exitRequested = false;
+			while(!exitRequested){
+	            user.showProfile(); // If logged in successfully, break out of the loop
+	            Color::setTextColor(Color::BrightCyan);
+	            cout << "[";
+	            Color::setTextColor(Color::BrightRed);
+				cout << "1";
+				Color::setTextColor(Color::BrightCyan);
+				cout << "] ";
+				Color::setTextColor(Color::BrightGreen);
+				cout << "Show All Availabe Property"<<endl;
+				Color::setTextColor(Color::BrightCyan);
+	            cout << "[";
+	            Color::setTextColor(Color::BrightRed);
+				cout << "2";
+				Color::setTextColor(Color::BrightCyan);
+				cout << "] ";
+				Color::setTextColor(Color::BrightGreen);
+				cout << "Search Property"<<endl;
+				Color::setTextColor(Color::BrightCyan);
+	            cout << "[";
+	            Color::setTextColor(Color::BrightRed);
+				cout << "3";
+				Color::setTextColor(Color::BrightCyan);
+				cout << "] ";
+				Color::setTextColor(Color::BrightGreen);
+				cout << "Buy A Property"<<endl;
+				Color::setTextColor(Color::BrightCyan);
+	            cout << "[";
+	            Color::setTextColor(Color::BrightRed);
+				cout << "4";
+				Color::setTextColor(Color::BrightCyan);
+				cout << "] ";
+				Color::setTextColor(Color::BrightGreen);
+				cout << "Edit Account"<<endl;
+				Color::setTextColor(Color::BrightCyan);
+	            cout << "[";
+	            Color::setTextColor(Color::BrightRed);
+				cout << "5";;
+				Color::setTextColor(Color::BrightCyan);
+				cout << "] ";
+				Color::setTextColor(Color::BrightGreen);
+				cout << "Logout"<<endl;
+	            Color::setTextColor(Color::White);
+	            Color::setTextColor(Color::Yellow);
+	            int option = user.userOption(user.getId(), user.getUsername(), user.getPassword());
+	            
+	            switch(option){
+	            	case 1:
+						{
+		            		system("cls");
+		            		Color::setTextColor(Color::White);
+		            		cout<<"Show All Availabe Property is ";
+		            		Color::setTextColor(Color::Red);
+							cout << "*";
+							Color::setTextColor(Color::BrightGreen);
+							cout << "Coming Soon";
+							Color::setTextColor(Color::Yellow);
+							cout << "!";
+							Color::setTextColor(Color::Red);
+							cout << "*"<<endl;
+							Color::setTextColor(Color::White);
+						}
+	            		break;
+	            	case 2:
+						{
+		            		system("cls");
+		            		cout<<"Search Property is ";
+		            		Color::setTextColor(Color::Red);
+							cout << "*";
+							Color::setTextColor(Color::BrightGreen);
+							cout << "Coming Soon";
+							Color::setTextColor(Color::Yellow);
+							cout << "!";
+							Color::setTextColor(Color::Red);
+							cout << "*"<<endl;
+							Color::setTextColor(Color::White);
+						}
+	            		break;
+	            	case 3:
+	            		{
+		            		system("cls");
+		            		cout<<"Buy A Property is ";
+		            		Color::setTextColor(Color::Red);
+							cout << "*";
+							Color::setTextColor(Color::BrightGreen);
+							cout << "Coming Soon";
+							Color::setTextColor(Color::Yellow);
+							cout << "!";
+							Color::setTextColor(Color::Red);
+							cout << "*"<<endl;
+							Color::setTextColor(Color::White);
+						}
+	            		break;
+	            	case 4:
+	            		{
+	            		system("cls");
+	            		cout<<"Edit Account is ";
+	            		Color::setTextColor(Color::Red);
+						cout << "*";
+						Color::setTextColor(Color::BrightGreen);
+						cout << "Coming Soon";
+						Color::setTextColor(Color::Yellow);
+						cout << "!";
+						Color::setTextColor(Color::Red);
+						cout << "*"<<endl;
+						Color::setTextColor(Color::White);
+						}
+	            		break;
+	            	case 5:
+	            		exitRequested = true;
+	            		system("cls");
+	            		user.logout();
+	            		main();
+	            		break;
+	        		default:
+	        			break;
+				}
 			}
-            
             break;
         } else {
             counter++;
@@ -1743,7 +1795,20 @@ void adminLogin() {
 						}
 	            		break;
 	            	case 4:
-	            		cout<<"Edit Accounts"<<endl;
+	            		{
+		            		system("cls");
+		            		Color::setTextColor(Color::White);
+		            		cout << "Edit Account is";
+		            		Color::setTextColor(Color::Red);
+							cout << "*";
+							Color::setTextColor(Color::BrightGreen);
+							cout << "Coming Soon";
+							Color::setTextColor(Color::Yellow);
+							cout << "!";
+							Color::setTextColor(Color::Red);
+							cout << "*"<<endl;
+							Color::setTextColor(Color::White);
+						}
 	            		break;
 	            	case 5:
 	            		{
