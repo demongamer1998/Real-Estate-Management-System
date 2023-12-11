@@ -108,24 +108,6 @@ void countdown(int seconds) {
     }
 }
 
-/*
-//Generate PropertyID
-string generatePropertyId() {
-    srand(static_cast<unsigned int>(time(NULL))); // Seed the random number generator
-    const string charset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"; // Alphanumeric characters
-
-    string propertyId;
-    propertyId.reserve(6);
-
-    for (int i = 0; i < 6; ++i) {
-        propertyId += charset[rand() % charset.length()];
-    }
-
-    return propertyId;
-}
-*/
-
-
 class RealEstateProperty {
 private:
 	string propertyId;
@@ -143,12 +125,10 @@ public:
     RealEstateProperty(string type, string addr, string lotTitle, int beds, int baths, double lotarea, double pr) :
     propertyType(type), propertyAddress(addr), propertyLotTitle(lotTitle), bedrooms(beds), bathrooms(baths), lotArea(lotarea), price(pr), is_available(true) {}
 
-
-    
 	void showAllAvailableProperty() {
 	    ifstream input("globalProperty.txt");
-	    string propertyId, propertyType, propertyAddress, propertyLotTitle;
 	    string line;
+	    string propertyId, propertyType, propertyAddress, propertyLotTitle;
 	    int bedrooms, bathrooms;
 	    double price,lotArea;
 	    bool is_available = true;
@@ -161,6 +141,8 @@ public:
 	        cout << "---------------------------------" << endl;
 	        return;
 	    }
+	    
+	    
 	
 	    while (getline(input, line)) {
 	    	istringstream ss(line);
@@ -239,6 +221,44 @@ public:
 			cout<< (isAvailable ? "Yes" : "No") << endl;
 			Color::setTextColor(Color::BrightYellow);
 	        cout << "---------------------------------" << endl;
+			}
+	    }
+	
+	    input.close();
+	}
+	
+	bool isPropertyAvailable(string Id) const {
+	    ifstream input("globalProperty.txt");
+	    string propertyId, propertyType, propertyAddress, propertyLotTitle;
+	    string line;
+	    int bedrooms, bathrooms;
+	    double price,lotArea;
+	    bool isAvailable;
+	
+	    if (!input.is_open()) {
+	    	// No database
+	    }
+	    
+	
+	    while (getline(input, line)) {
+	    	istringstream ss(line);
+	        getline(ss, propertyId, ',');
+	        getline(ss, propertyType, ',');
+	        getline(ss, propertyAddress, ',');
+	        getline(ss, propertyLotTitle, ',');
+	        ss >> bedrooms;
+	        ss.ignore(); // Ignore the comma
+	        ss >> bathrooms;
+	        ss.ignore(); // Ignore the comma
+	        ss >> lotArea;
+	        ss.ignore(); // Ignore the comma
+	        ss >> price;
+	        ss.ignore(); // Ignore the comma
+	        ss >> isAvailable;
+	        
+	        if(Id == propertyId){
+				return isAvailable;
+				break;
 			}
 	    }
 	
@@ -1037,6 +1057,54 @@ public:
 	    input.close();
 	}
     
+  	void readPropertyById(string id) {
+	    ifstream input("globalProperty.txt");
+	    string propertyId, propertyType, propertyAddress, propertyLotTitle;
+	    string line;
+	    int bedrooms, bathrooms;
+	    double price, lotArea;
+	    bool isAvailable;
+	
+	    if (!input.is_open()||input.peek() == ifstream::traits_type::eof()) {
+	    	Color::setTextColor(Color::BrightRed);
+	        cout << "\n    NO RECORDS AVAILABLE YET" << endl << endl;
+	        Color::setTextColor(Color::BrightYellow);
+	        cout << "---------------------------------" << endl;
+	        return;
+	    }
+	
+	    while (getline(input, line)) {
+	    	istringstream ss(line);
+	        getline(ss, propertyId, ',');
+	        getline(ss, propertyType, ',');
+	        getline(ss, propertyAddress, ',');
+	        getline(ss, propertyLotTitle, ',');
+	        ss >> bedrooms;
+	        ss.ignore(); // Ignore the comma
+	        ss >> bathrooms;
+	        ss.ignore(); // Ignore the comma
+	        ss >> lotArea;
+	        ss.ignore(); // Ignore the comma
+	        ss >> price;
+	        ss.ignore(); // Ignore the comma
+	        ss >> isAvailable;
+	        
+	        if(id == propertyId){
+	        propertyId = propertyId;
+	        propertyType = propertyType;
+	        propertyAddress = propertyAddress;
+	        propertyLotTitle = propertyLotTitle;
+	        bedrooms = bedrooms;
+	        bathrooms = bathrooms;
+	        lotArea = lotArea;
+	        price = price;
+	        isAvailable = isAvailable;
+			}
+	    }
+	
+	    input.close();
+	}
+    
 	void showAllProperty() {
 	    ifstream input("globalProperty.txt");
 	    string line;
@@ -1646,7 +1714,6 @@ public:
 				}
 			}while(true);
 	}
-	
 	
     void updateProperty() {
         ifstream inputFile("globalProperty.txt");
@@ -2516,8 +2583,6 @@ public:
         }
     }
 	
-	
-	
 	//DeleteProperty Constructor
 	void deleteProperty() {
 	    ifstream inputFile("globalProperty.txt");
@@ -2651,64 +2716,42 @@ public:
 	    input.close();
 	    return false; // ID doesn't exist in the database
 	}
-	
-/*
-	//Checks Generated PropertyID	
-	bool checkPropertyIdExists(const string& enteredIdToCheck) {
+    
+	// Function to check if the generated PROPERTYID already exists in the database
+	bool propertyIdExists(string idToCheck) {
 	    ifstream input("globalProperty.txt");
 	    string line;
-	    
-		if(!input.is_open()){
-			system("cls");
-			Color::setTextColor(Color::BrightRed);
-			cout<<"Cannot connect to database...";
-		}
-	
+	    string propertyId, propertyType, propertyAddress, propertyLotTitle;
+	    int bedrooms, bathrooms;
+	    double price, lotArea;
+	    bool isAvailable;
+
 	    while (getline(input, line)) {
-	        vector<string> tokens;
-	        stringstream ss(line);
-	        string token;
-	
-	        while (ss >> token) {
-	            tokens.push_back(token);
-	        }
-	
-	        if (tokens.size() >= 1 && tokens[1] == enteredIdToCheck) {
+	    	istringstream ss(line);
+	        getline(ss, propertyId, ',');
+	        getline(ss, propertyType, ',');
+	        getline(ss, propertyAddress, ',');
+	        getline(ss, propertyLotTitle, ',');
+	        ss >> bedrooms;
+	        ss.ignore(); // Ignore the comma
+	        ss >> bathrooms;
+	        ss.ignore(); // Ignore the comma
+	        ss >> lotArea;
+	        ss.ignore(); // Ignore the comma
+	        ss >> price;
+	        ss.ignore(); // Ignore the comma
+	        ss >> isAvailable;
+	        
+	        if (propertyId == idToCheck) {
 	            input.close();
-	            return true;
+	            return true; // ID exists in the database
 	        }
+	        // Skip the rest of the line
+	        input.ignore(numeric_limits<streamsize>::max(), '\n');
 	    }
-	
 	    input.close();
-	    return false;
+	    return false; // ID doesn't exist in the database
 	}
-*/
-
-
-/*
-    // Function to generate a unique 6-digit ID not present in the user database
-    string generatePropertyUniqueID() {
-        ifstream input("globalProperty.txt");
-        string maxID = "";
-        string id;
-
-        while (input >> id) {
-            if (id > maxID) {
-                maxID = id;
-            }
-            // Skip the rest of the line
-            input.ignore(numeric_limits<streamsize>::max(), '\n');
-        }
-        input.close();
-
-        string newID;
-        do {
-            newID = generatePropertyId();
-        } while (checkPropertyIdExists(newID));
-
-        return newID;
-    }
-*/
     
     string getPropertyId() const {return propertyId;}
     string getPropertyType() const {return propertyType;}
@@ -2721,7 +2764,6 @@ public:
     bool isAvailable() const {return is_available;} ;
 };
 
-
 class UserProfile {
 private:
     int id;
@@ -2729,12 +2771,11 @@ private:
     string password;
     double coins;
     bool is_logged_in;
+    vector<RealEstateProperty> ownedProperties;
 
 public:
     UserProfile(int user_id, string uname, string pwd)
         : id(user_id), username(uname), password(pwd), is_logged_in(false) {}
-
-
 
 	 void login(const string& entered_username, const string& entered_password) {
 	    ifstream input("userDatabase.txt");
@@ -2775,6 +2816,36 @@ public:
 	    input.close();
 	}
 	
+    void buyProperty(string propertyId) {
+		string propertyType, propertyAddress, propertyLotTitle ; 
+		int bedrooms, bathrooms; 
+		double price, lotArea;
+		
+		RealEstateProperty property(propertyType, propertyAddress, propertyLotTitle, bedrooms, bathrooms, lotArea,price);
+		property.readPropertyById(propertyId);
+        // Check if property exists and is available
+        if (propertyExists(propertyId) && property.isPropertyAvailable(propertyId)) {
+            double propertyPrice = property.getPrice();
+            if (coins >= propertyPrice) {
+                coins -= propertyPrice;
+                ownedProperties.push_back(property);
+                updatePropertyAvailability(propertyId, false);
+                updateUserCoins(propertyId, coins);
+                saveUserToFile();
+
+                savePropertyToFile(propertyId, property);
+                Color::setTextColor(Color::BrightGreen);
+                cout << "Property purchased successfully!" << endl;
+            } else {
+            	Color::setTextColor(Color::BrightRed);
+                cout << "Insufficient coins to purchase the property." << endl;
+            }
+        } else {
+        	Color::setTextColor(Color::Red);
+            cout << "Property not available or does not exist." << endl;
+        }
+    }
+	
     // Function to update user password
     void updateUserPassword(const string& new_password) {
         password = new_password;
@@ -2787,47 +2858,6 @@ public:
         saveUserToFile(); // Save the updated coins to file
     }
     
-    void saveUserToFile() {
-        ifstream inFile("userDatabase.txt");
-        ofstream outFile("temp.txt");
-
-        if (!inFile.is_open() || !outFile.is_open()) {
-            // Handle unable to open the file
-            return;
-        }
-
-        string line;
-        while (getline(inFile, line)) {
-            istringstream ss(line);
-            int file_id;
-            string file_username, file_password;
-            double file_coins;
-            int login;
-
-            ss >> file_id;
-            ss.ignore();
-            getline(ss, file_username, ',');
-            getline(ss, file_password, ',');
-            ss >> file_coins;
-            cin.ignore();
-            ss >> login;
-
-            if (file_id == id) {
-                // Update the line with new data
-                outFile << id << "," << username << "," << password << "," << coins << "," << login << endl;
-            } else {
-                // Write the existing line as is
-                outFile << line << endl;
-            }
-        }
-
-        inFile.close();
-        outFile.close();
-
-        remove("userDatabase.txt");
-        rename("temp.txt", "userDatabase.txt");
-    }
-	
 	int userOption(int id, string username, string password){
 		int option;
 		    while (true) {
@@ -2884,7 +2914,7 @@ public:
 					Color::setTextColor(Color::BrightCyan);
 					cout << "] ";
 					Color::setTextColor(Color::BrightGreen);
-					cout << "Buy A Property //Coming soon"<<endl;
+					cout << "Buy A Property"<<endl;
 					Color::setTextColor(Color::BrightCyan);
 		            cout << "[";
 		            Color::setTextColor(Color::BrightRed);
@@ -3043,13 +3073,182 @@ public:
         logoutCountdown(3);
         system("cls");
     }
-
+	
     // Accessors (getters)
     int getId() const { return id; }
     string getPassword() const {return password;} 
     string getUsername() const { return username; }
     double getCoins() const {return coins;}
     bool isLoggedIn() const { return is_logged_in; }
+    
+    
+private:
+	// Function to check if a property exists
+	bool propertyExists(string id) {
+	    ifstream propertyFile("globalProperty.txt");
+	    if (!propertyFile.is_open()) {
+	        // Handle unable to open the file
+	        return false;
+	    }
+	
+	    string line;
+	    while (getline(propertyFile, line)) {
+	        istringstream ss(line);
+	        string propertyId;
+	        // Assuming propertyId is the first value in each line of the property file
+	        getline(ss, propertyId, ',');
+	
+	        if (propertyId == id) {
+	            propertyFile.close();
+	            return true;
+	        }
+	    }
+	
+	    propertyFile.close();
+	    return false;
+	}
+
+	// Function to update property availability
+	void updatePropertyAvailability(string id, bool availability) {
+	    ifstream inFile("globalProperty.txt");
+	    ofstream outFile("temp.txt");
+	
+	    if (!inFile.is_open() || !outFile.is_open()) {
+	        // Handle unable to open the file
+	        return;
+	    }
+	
+	    string line;
+	    while (getline(inFile, line)) {
+	        istringstream ss(line);
+		    string propertyId, propertyType, propertyAddress, propertyLotTitle;
+		    int bedrooms, bathrooms;
+		    double price,lotArea;
+		    bool is_available = true;
+		    bool isAvailable;
+	
+	        // Assuming the format in propertyDatabase.txt is: ID, Type, Address, Availability
+	        getline(ss, propertyId, ',');
+	        getline(ss, propertyType, ',');
+	        getline(ss, propertyAddress, ',');
+	        getline(ss, propertyLotTitle, ',');
+	        ss >> bedrooms;
+	        ss.ignore(); // Ignore the comma
+	        ss >> bathrooms;
+	        ss.ignore(); // Ignore the comma
+	        ss >> lotArea;
+	        ss.ignore(); // Ignore the comma
+	        ss >> price;
+	        ss.ignore(); // Ignore the comma
+	        ss >> isAvailable;
+	
+	        if (propertyId == id && is_available==isAvailable) {
+	            // Update the line with new availability
+	            outFile << propertyId << "," << propertyType << "," << propertyAddress << "," << propertyLotTitle << "," 
+								 << bedrooms << "," << bathrooms << "," << lotArea <<"," << price << "," << availability << endl;
+	        } else {
+	            // Write the existing line as is
+	            outFile << line << endl;
+	        }
+	    }
+	
+	    inFile.close();
+	    outFile.close();
+	
+	    remove("globalProperty.txt");
+	    rename("temp.txt", "globalProperty.txt");
+	}
+
+    void updateUserCoins(string userId, double updatedCoins) {
+        coins = updatedCoins;
+        saveUserToFile(); // Save the updated coins to file
+    }
+
+    void saveUserToFile() {
+        ifstream inFile("userDatabase.txt");
+        ofstream outFile("temp.txt");
+
+        if (!inFile.is_open() || !outFile.is_open()) {
+            // Handle unable to open the file
+            return;
+        }
+
+        string line;
+        while (getline(inFile, line)) {
+            istringstream ss(line);
+            int file_id;
+            string file_username, file_password;
+            double file_coins;
+            int login;
+
+            ss >> file_id;
+            ss.ignore();
+            getline(ss, file_username, ',');
+            getline(ss, file_password, ',');
+            ss >> file_coins;
+            cin.ignore();
+            ss >> login;
+
+            if (file_id == id) {
+                // Update the line with new data
+                outFile << id << "," << username << "," << password << "," << coins << "," << login << endl;
+            } else {
+                // Write the existing line as is
+                outFile << line << endl;
+            }
+        }
+
+        inFile.close();
+        outFile.close();
+
+        remove("userDatabase.txt");
+        rename("temp.txt", "userDatabase.txt");
+    }
+
+    void savePropertyToFile(string propId, const RealEstateProperty& property) {
+	    ifstream input("globalProperty.txt");
+	    string propertyId, propertyType, propertyAddress, propertyLotTitle;
+	    string line;
+	    int bedrooms, bathrooms;
+	    double price,lotArea;
+	    bool isAvailable;
+	
+	    if (!input.is_open()) {
+	    	// No database
+	    }
+	    
+	
+	    while (getline(input, line)) {
+	    	istringstream ss(line);
+	        getline(ss, propertyId, ',');
+	        getline(ss, propertyType, ',');
+	        getline(ss, propertyAddress, ',');
+	        getline(ss, propertyLotTitle, ',');
+	        ss >> bedrooms;
+	        ss.ignore(); // Ignore the comma
+	        ss >> bathrooms;
+	        ss.ignore(); // Ignore the comma
+	        ss >> lotArea;
+	        ss.ignore(); // Ignore the comma
+	        ss >> price;
+	        ss.ignore(); // Ignore the comma
+	        ss >> isAvailable;
+	        
+	        if(propId == propertyId){
+		        ofstream outFile("soldProperty.txt", ios::app);
+		        if (outFile.is_open()) {
+		            // Save property details to file
+		            outFile << id << "," << propertyId << "," << property.getPropertyType() << "," << property.getPropertyAddress() << "," << property.getLotTitle() << "," 
+							<< property.getBedrooms() << "," << property.getBathrooms() << "," << property.getLotArea() << "," << property.getPrice() << "," << property.getPropertyType() << endl;
+		            outFile.close();
+		        } else {
+		            cout << "Unable to save property details." << endl;
+		        }
+			}
+	    }
+	
+	    input.close();
+    }
 };
 
 class AdminProfile {
@@ -3074,16 +3273,17 @@ public:
 	    string line;
 	    
 	    while (getline(input, line)) {
-	        stringstream ss(line);
-	        int id; // Declare id variable to store the integer ID
-	        string username, password;
-	        
-	        ss >> id >> username >> password; // Read id, username, and password
+	    	istringstream ss(line);
+	    	ss >> id;
+	        ss.ignore(); // Ignore the comma
+	        getline(ss, username, ',');
+	        getline(ss, password, ',');
 	        
 	        if (username == entered_username && password == entered_password) {
 	            is_logged_in = true;
 	            this->id = id; // Assign the id to the class member
 	            this->username = username;
+	            this->password = password;
 	            Color::setTextColor(Color::BrightGreen);
 	            cout << "LoggedIn successfully." << endl; // If username and password exist
 	            Color::setTextColor(Color::White);
@@ -3099,7 +3299,149 @@ public:
 	    input.close();
 	}
 	
-    void showProfile(){
+    // Function to update user password
+    void updateUserPassword(const string& new_password) {
+        password = new_password;
+        saveUserToFile(); // Save the updated password to file
+    }
+	
+    void saveUserToFile() {
+        ifstream inFile("adminDatabase.txt");
+        ofstream outFile("adminTemp.txt");
+
+        if (!inFile.is_open() || !outFile.is_open()) {
+            // Handle unable to open the file
+            return;
+        }
+
+        string line;
+        while (getline(inFile, line)) {
+            istringstream ss(line);
+            int file_id;
+            string file_username, file_password;
+            int login;
+
+            ss >> file_id;
+            ss.ignore();
+            getline(ss, file_username, ',');
+            getline(ss, file_password, ',');
+            ss >> login;
+
+            if (file_id == id) {
+                // Update the line with new data
+                outFile << id << "," << username << "," << password << "," << login << endl;
+            } else {
+                // Write the existing line as is
+                outFile << line << endl;
+            }
+        }
+
+        inFile.close();
+        outFile.close();
+
+        remove("adminDatabase.txt");
+        rename("adminTemp.txt", "adminDatabase.txt");
+    }
+	
+	// Function to check if the generated USERID already exists in the database
+	bool adminIdExistsInDatabase(int idToCheck) {
+	    ifstream input("adminDatabase.txt");
+	    int id;
+	
+	    while (input >> id) {
+	        if (id == idToCheck) {
+	            input.close();
+	            return true; // ID exists in the database
+	        }
+	        // Skip the rest of the line
+	        input.ignore(numeric_limits<streamsize>::max(), '\n');
+	    }
+	    input.close();
+	    return false; // ID doesn't exist in the database
+	}
+	
+	// Function to generate a unique 6-digit ID not present in the user database
+	int generateAdminUniqueID() {
+	    ifstream input("adminDatabase.txt");
+	    int maxID = 0;
+	    int id;
+	
+	    while (input >> id) {
+	        if (id > maxID) {
+	            maxID = id;
+	        }
+	        // Skip the rest of the line
+	        input.ignore(numeric_limits<streamsize>::max(), '\n');
+	    }
+	    input.close();
+	
+	    int newID;
+	    do {
+	        newID = generateRandom6DigitNumber();
+	    } while (adminIdExistsInDatabase(newID));
+	
+	    return newID;
+	}
+	
+	// Function to generate a random 6-digit number
+	int generateRandom6DigitNumber() {
+	    srand(static_cast<unsigned int>(time(NULL))); // Seed the random number generator
+	    return rand() % 900000 + 100000; // Generate a random number in the range 100000 to 999999
+	}
+	
+	bool checkAdminUsernameExists(const string& enteredUsername) {
+	    ifstream input("adminDatabase.txt");
+	    string line;
+	    int userId;
+	    string username, password;
+	    double coins;
+	    
+	    
+		if(!input.is_open()){
+			// if no data base exist
+			Color::setTextColor(Color::BrightRed);
+			cout << "Database do not exist. ";
+			Color::setTextColor(Color::BrightGreen);
+			cout << "Default admin account have been created successfully." << endl;
+		}
+	
+	    while (getline(input, line)) {
+	    	istringstream ss(line);
+	    	ss >> userId;
+	        ss.ignore(); // Ignore the comma
+	        getline(ss, username, ',');
+	        getline(ss, password, ',');
+	        if(username==enteredUsername){
+	        	return true;
+			}
+	    }
+	
+	    input.close();
+	    return false;
+	}
+	
+	void createDefaultAdminAccount(){
+    string enteredUsername="admin",confirmPassword="admin";
+    bool exist = false;
+
+	    do {
+	    	
+	        exist = checkAdminUsernameExists(enteredUsername);
+	
+			if (exist) {
+				break;
+	        }else {
+	        	
+			    int newId = generateAdminUniqueID(); // Generate a unique ID
+			
+			    ofstream reg("adminDatabase.txt", ios::app);
+			    reg << newId << "," << enteredUsername << "," << confirmPassword << "," << "0" << endl;
+			    reg.close();
+			}
+	    } while (exist);
+	}
+	
+    void showProfile(int adminID){
     	Color::setTextColor(Color::Cyan);
     	cout<<"ADMIN PROFILE"<<endl;
     	Color::setTextColor(Color::BrightYellow);
@@ -3107,7 +3449,7 @@ public:
     	Color::setTextColor(Color::Yellow);
     	cout<<"ID: ";
     	Color::setTextColor(Color::BrightYellow);
-    	cout<<getId()<<endl;
+    	cout<<adminID<<endl;
     	Color::setTextColor(Color::Yellow);
     	cout<<"USERNAME: ";
     	Color::setTextColor(Color::BrightYellow);
@@ -3116,9 +3458,81 @@ public:
     	cout << "---------------------------------" << endl;
 	}
 	
+	int adminAccountOption(int id, string username, string password){
+		int option;
+		    while (true) {
+		        Color::setTextColor(Color::Yellow);
+		        cout << "Enter your choice: ";
+		        Color::setTextColor(Color::White);
+		
+		        if (!(cin >> option) || option < 1 || option > 3) {
+		            cin.clear(); // Clear error flags
+		            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear input buffer
+		            system("cls");
+		            Color::setTextColor(Color::Red);
+		            cout << "Invalid choice. ";
+		            Color::setTextColor(Color::White);
+					cout << "Please enter your choice between ";
+		            Color::setTextColor(Color::BrightCyan);
+		            cout << "[";
+		            Color::setTextColor(Color::BrightGreen);
+					cout << "1";
+					Color::setTextColor(Color::BrightCyan);
+					cout << "] ";
+		            Color::setTextColor(Color::Yellow);
+		            cout << "to ";
+		            Color::setTextColor(Color::BrightCyan);
+		            cout << "[";
+		            Color::setTextColor(Color::BrightGreen);
+					cout << "3";
+					Color::setTextColor(Color::BrightCyan);
+					cout << "] ";
+					Color::setTextColor(Color::White);
+					cout << "only.\n";
+		            showProfile(getId()); // If logged in successfully, show user profile
+		            // Display menu options
+		            Color::setTextColor(Color::BrightCyan);
+		            cout << "[";
+		            Color::setTextColor(Color::BrightRed);
+					cout << "1";
+					Color::setTextColor(Color::BrightCyan);
+					cout << "] ";
+					Color::setTextColor(Color::BrightGreen);
+					cout << "Create Admin Account"<<endl;
+					Color::setTextColor(Color::BrightCyan);
+		            cout << "[";
+		            Color::setTextColor(Color::BrightRed);
+					cout << "2";
+					Color::setTextColor(Color::BrightCyan);
+					cout << "] ";
+					Color::setTextColor(Color::BrightGreen);
+					cout << "Change Password"<<endl;
+					Color::setTextColor(Color::BrightCyan);
+		            cout << "[";
+		            Color::setTextColor(Color::BrightRed);
+					cout << "3";
+					Color::setTextColor(Color::BrightCyan);
+					cout << "] ";
+					Color::setTextColor(Color::BrightGreen);
+					cout << "Exit"<<endl;
+		            Color::setTextColor(Color::White);
+		            Color::setTextColor(Color::Yellow);;
+		            // Display other menu options similarly
+		            Color::setTextColor(Color::White);
+		            continue; // Restart the loop
+		        }
+		
+		        // Clear any additional characters in the input buffer
+		        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+		
+		        // Valid input, break the loop
+		        break;
+		    }
+		return option;
+	}
+	
 	int adminOption(int id, string username, string password){
 		int option;
-		AdminProfile admin(id, username, password);
 		    while (true) {
 		        Color::setTextColor(Color::Yellow);
 		        cout << "Enter your choice: ";
@@ -3148,7 +3562,7 @@ public:
 					cout << "] ";
 		            Color::setTextColor(Color::White);
 					cout << "only.\n";
-		            admin.showProfile(); // If logged in successfully, show user profile
+		            showProfile(getId()); // If logged in successfully, show user profile
 		            // Display menu options
 		            Color::setTextColor(Color::BrightCyan);
 		            cout << "[";
@@ -3284,9 +3698,7 @@ bool checkUserUsernameExists(const string& enteredUsername) {
     
     
 	if(!input.is_open()){
-		system("cls");
-		Color::setTextColor(Color::BrightRed);
-		cout<<"Cannot connect to database...";
+		// if no database exist
 	}
 
     while (getline(input, line)) {
@@ -3305,16 +3717,6 @@ bool checkUserUsernameExists(const string& enteredUsername) {
     return false;
 }
 
-/*
-bool hasSpaces(const string &str) {
-    for (size_t i = 0; i < str.length(); ++i) {
-        if (str[i] == ' ') {
-            return true;
-        }
-    }
-    return false;
-}
-*/
 
 void registerUser() {
     string enteredUsername, enteredPassword, confirmPassword;
@@ -3427,7 +3829,7 @@ void userLogin() {
 				Color::setTextColor(Color::BrightCyan);
 				cout << "] ";
 				Color::setTextColor(Color::BrightGreen);
-				cout << "Buy A Property //Coming soon"<<endl;
+				cout << "Buy A Property"<<endl;
 				Color::setTextColor(Color::BrightCyan);
 	            cout << "[";
 	            Color::setTextColor(Color::BrightRed);
@@ -3457,7 +3859,7 @@ void userLogin() {
 							double price, lotArea;
 							
 							RealEstateProperty property(propertyType, propertyAddress, propertyLotTitle, bedrooms, bathrooms, lotArea,price);
-							Color::setTextColor(Color::Cyan);
+							Color::setTextColor(Color::BrightCyan);
         					cout << "PROPERTY'S MARKET PLACE"<<endl;
         					Color::setTextColor(Color::BrightYellow);
 	        				cout << "---------------------------------" << endl;
@@ -3480,18 +3882,70 @@ void userLogin() {
 						}
 	            		break;
 	            	case 3:
-	            		{
-		            		system("cls");
-		            		cout<<"Buy A Property is ";
-		            		Color::setTextColor(Color::Red);
-							cout << "*";
-							Color::setTextColor(Color::BrightGreen);
-							cout << "Coming Soon";
-							Color::setTextColor(Color::Yellow);
-							cout << "!";
-							Color::setTextColor(Color::Red);
-							cout << "*"<<endl;
-							Color::setTextColor(Color::White);
+	            		{	
+						    string propertyId, propertyType, propertyAddress, propertyLotTitle;
+						    int bedrooms, bathrooms;
+						    double price,lotArea;
+						    RealEstateProperty property(propertyType, propertyAddress, propertyLotTitle, bedrooms, bathrooms, lotArea,price);
+							
+							system("cls");
+	            			string propertyIdToBuy;
+						    Color::setTextColor(Color::BrightCyan);
+						    cout << "BUY A PROPERTY" << endl;
+						    user.showProfile(user.getId());
+						    Color::setTextColor(Color::Yellow);
+						    cout << "Enter Property ID: ";
+						    Color::setTextColor(Color::White);
+						    while(!(cin>>propertyIdToBuy)){
+						    	Color::setTextColor(Color::Yellow);
+						    	cout << "Enter Property ID: ";
+						    	Color::setTextColor(Color::White);
+							}
+
+						    char ans;
+						    system("cls");
+						    do{
+							    Color::setTextColor(Color::BrightCyan);
+							    cout << "BUY A PROPERTY" << endl;
+							    user.showProfile(user.getId());
+						    	property.showPropertyById(propertyIdToBuy);
+						    	Color::setTextColor(Color::BrightYellow);
+						    	cout << "You will buy this property." << endl;
+						    	Color::setTextColor(Color::Yellow);
+						    	cout << "Do you want to continue? (Y/N) : ";
+						    	Color::setTextColor(Color::White);
+						    	cin>>ans;
+						    	
+						    	if(ans=='Y'||ans=='y'){
+									system("cls");
+						    		user.buyProperty(propertyIdToBuy);
+									countdown(1);
+									loginCountdown(3);
+						    		break;
+								}else if(ans=='N'||ans=='n'){
+									system("cls");
+									Color::setTextColor(Color::BrightGreen);
+									cout << "Buying property have been canceled.";
+									countdown(1);
+									loginCountdown(3);
+									break;
+								}else{
+									system("cls");
+						            Color::setTextColor(Color::Red);
+						            cout << "Invalid";
+						            Color::setTextColor(Color::White);
+									cout << " input. Please enter a ";
+						            Color::setTextColor(Color::BrightGreen);
+									cout << "valid ";
+									Color::setTextColor(Color::Yellow);
+									cout << "choice." << endl;
+							        Color::setTextColor(Color::BrightCyan);
+									continue;
+								}
+						    	
+							}while(true);
+							
+							
 						}
 	            		break;
 	            	case 4:
@@ -3838,20 +4292,26 @@ int generateAdminUniqueID() {
 bool checkAdminUsernameExists(const string& enteredUsername) {
     ifstream input("adminDatabase.txt");
     string line;
+    int userId;
+    string username, password;
+    double coins;
+    
+    
+	if(!input.is_open()){
+		system("cls");
+		Color::setTextColor(Color::BrightRed);
+		cout<<"Cannot connect to database...";
+	}
 
     while (getline(input, line)) {
-        vector<string> tokens;
-        stringstream ss(line);
-        string token;
-
-        while (ss >> token) {
-            tokens.push_back(token);
-        }
-
-        if (tokens.size() >= 2 && tokens[1] == enteredUsername) {
-            input.close();
-            return true;
-        }
+    	istringstream ss(line);
+    	ss >> userId;
+        ss.ignore(); // Ignore the comma
+        getline(ss, username, ',');
+        getline(ss, password, ',');
+        if(username==enteredUsername){
+        	return true;
+		}
     }
 
     input.close();
@@ -3913,9 +4373,8 @@ void registerAdmin() {
 
     system("cls");
     Color::setTextColor(Color::BrightGreen);
-    cout << "User registered successfully!" << endl;
+    cout << "Admin account registered successfully!" << endl;
     Color::setTextColor(Color::White);
-    main();
 }
 
 
@@ -3943,7 +4402,7 @@ void adminLogin() {
         if (admin.isLoggedIn()) {
         	bool exitRequested = false;
         	while(!exitRequested){
-        	admin.showProfile(); // If logged in successfully, break out of the loop
+        	admin.showProfile(admin.getId()); // If logged in successfully, break out of the loop
             Color::setTextColor(Color::BrightCyan);
             cout << "[";
             Color::setTextColor(Color::BrightRed);
@@ -4038,18 +4497,155 @@ void adminLogin() {
 	            		break;
 	            	case 4:
 	            		{
-		            		system("cls");
-		            		Color::setTextColor(Color::White);
-		            		cout << "Edit Account is";
-		            		Color::setTextColor(Color::Red);
-							cout << "*";
-							Color::setTextColor(Color::BrightGreen);
-							cout << "Coming Soon";
-							Color::setTextColor(Color::Yellow);
-							cout << "!";
-							Color::setTextColor(Color::Red);
-							cout << "*"<<endl;
-							Color::setTextColor(Color::White);
+        					bool exitRequested = false;
+        					while(!exitRequested){
+			            			system("cls");
+									Color::setTextColor(Color::BrightCyan);
+		        					cout << "EDIT MY ACCOUNT"<<endl;
+		        					Color::setTextColor(Color::BrightYellow);
+						            admin.showProfile(admin.getId()); // If logged in successfully, break out of the loop
+						            Color::setTextColor(Color::BrightCyan);
+						            cout << "[";
+						            Color::setTextColor(Color::BrightRed);
+									cout << "1";
+									Color::setTextColor(Color::BrightCyan);
+									cout << "] ";
+									Color::setTextColor(Color::BrightGreen);
+									cout << "Create Admin Account"<<endl;
+									Color::setTextColor(Color::BrightCyan);
+						            cout << "[";
+						            Color::setTextColor(Color::BrightRed);
+									cout << "2";
+									Color::setTextColor(Color::BrightCyan);
+									cout << "] ";
+									Color::setTextColor(Color::BrightGreen);
+									cout << "Change Password"<<endl;
+									Color::setTextColor(Color::BrightCyan);
+						            cout << "[";
+						            Color::setTextColor(Color::BrightRed);
+									cout << "3";
+									Color::setTextColor(Color::BrightCyan);
+									cout << "] ";
+									Color::setTextColor(Color::BrightGreen);
+									cout << "Exit"<<endl;
+						            Color::setTextColor(Color::White);
+						            int option = admin.adminAccountOption(admin.getId(),admin.getUsername(),admin.getPassword());
+						            
+						            switch(option){
+						            	case 1:
+						            		{	
+					            				system("cls");
+					            				registerAdmin();
+												countdown(1);
+										        loginCountdown(3);
+											}
+						            		break;
+						            	case 2:
+						            		{
+												string newPassword, password, confirmPassword;
+												system("cls");
+												Color::setTextColor(Color::BrightCyan);
+												cout << "CHANGE PASSWORD" << endl;
+						            			do{
+													admin.showProfile(admin.getId());
+												    Color::setTextColor(Color::Yellow);
+												    cout << "Enter current password: ";
+												    Color::setTextColor(Color::White);
+												    password = maskedInput();
+												    
+												    if(admin.getPassword()!=password){
+												        system("cls");
+												        Color::setTextColor(Color::Red);
+												        cout << "Incorrect Password." << endl;
+														Color::setTextColor(Color::BrightCyan);
+														cout << "CHANGE PASSWORD" << endl;
+													}
+												
+												}while(admin.getPassword()!=password);
+													system("cls");
+												do{
+													Color::setTextColor(Color::BrightCyan);
+													cout << "CHANGE PASSWORD" << endl;
+													admin.showProfile(admin.getId());
+												    Color::setTextColor(Color::Yellow);
+												    cout << "Enter new password: ";
+												    Color::setTextColor(Color::White);
+												    newPassword = maskedInput();
+												    
+												    Color::setTextColor(Color::Yellow);
+												    cout << "Confirm password: ";
+												    Color::setTextColor(Color::White);
+												    confirmPassword = maskedInput();
+												    
+												    if(newPassword!=confirmPassword){
+												        system("cls");
+												        Color::setTextColor(Color::Red);
+												        cout << "Password do not match." << endl;
+													} else if(confirmPassword==admin.getPassword()){
+											        	system("cls");
+												        Color::setTextColor(Color::Red);
+												        cout << "Cannot change for the same password." << endl;
+													}
+												    
+												} while(newPassword!=confirmPassword||confirmPassword==admin.getPassword());
+												
+												    
+											    do{
+													system("cls");
+													Color::setTextColor(Color::BrightCyan);
+													cout << "CHANGE PASSWORD" << endl;
+													admin.showProfile(admin.getId());
+													char ans;
+													Color::setTextColor(Color::BrightYellow);
+													cout << "Your password will be changed." << endl;
+													Color::setTextColor(Color::Yellow);
+													cout << "Do you want to continue? (Y/N): ";
+													Color::setTextColor(Color::White);
+													cin >> ans;	
+													
+													if(ans =='Y'||ans =='y'){
+														admin.updateUserPassword(confirmPassword);
+														system("cls");
+														Color::setTextColor(Color::BrightGreen);
+														cout << "Successfully changed the password.";
+														countdown(1);
+														loginCountdown(3);
+														break;
+													}else if(ans =='N'||ans =='n'){
+														system("cls");
+														Color::setTextColor(Color::BrightGreen);
+														cout << "Abort to changed the password.";
+														countdown(1);
+														loginCountdown(3);
+														break;
+													}else{
+														system("cls");
+											            Color::setTextColor(Color::Red);
+											            cout << "Invalid";
+											            Color::setTextColor(Color::White);
+														cout << " input. Please enter a ";
+											            Color::setTextColor(Color::BrightGreen);
+														cout << "valid ";
+														Color::setTextColor(Color::Yellow);
+														cout << "choice." << endl;
+												        Color::setTextColor(Color::BrightCyan);
+												        continue;
+													}
+												}while(true);
+												    
+												    
+											}
+						            		break;
+						            	case 3:
+						            		{
+						            			system("cls");
+						            			exitRequested = true;
+											}
+						            		break;
+						            	default:
+						            		break;
+									}
+							}
 						}
 	            		break;
 	            	case 5:
@@ -4203,20 +4799,32 @@ int main(){
     
     switch (choice) {
         case 1:
+        	{
         	system("cls");
+        	int id;
+        	string u, p;
+        	AdminProfile admin(id,u,p);
+        	admin.createDefaultAdminAccount();
         	adminLogin();
+			}
             break;
         case 2:
+        	{
         	system("cls");
         	userLogin();
+			}
             break;
          case 3:
+         	{
 			system("cls");
             registerUser();
+			}
             break;
         case 4:
+        	{
             cout << "Exiting the program." << endl;
             system(0);
+			}
             break;
         default:
             cout << "Invalid choice!" << endl;
