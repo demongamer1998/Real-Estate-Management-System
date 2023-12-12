@@ -133,6 +133,7 @@ public:
 	    double price,lotArea;
 	    bool is_available = true;
 	    bool isAvailable;
+	    int count;
 	
 	    if (!input.is_open()||input.peek() == ifstream::traits_type::eof()) {
 	    	Color::setTextColor(Color::BrightRed);
@@ -141,8 +142,6 @@ public:
 	        cout << "---------------------------------" << endl;
 	        return;
 	    }
-	    
-	    
 	
 	    while (getline(input, line)) {
 	    	istringstream ss(line);
@@ -159,9 +158,9 @@ public:
 	        ss >> price;
 	        ss.ignore(); // Ignore the comma
 	        ss >> isAvailable;
-	        
+
 	        if(is_available == isAvailable){
-	        
+	        count =+1;
 	        // Display property details here as needed
 	        Color::setTextColor(Color::BrightRed);
 	        cout << "PROPERTY'S DETAILS"<<endl;
@@ -222,9 +221,16 @@ public:
 			Color::setTextColor(Color::BrightYellow);
 	        cout << "---------------------------------" << endl;
 			}
+			
 	    }
-	
 	    input.close();
+	    
+			if(count==0){
+		    	Color::setTextColor(Color::BrightRed);
+		        cout << "\n    NO RECORDS AVAILABLE YET" << endl << endl;
+		        Color::setTextColor(Color::BrightYellow);
+		        cout << "---------------------------------" << endl;
+			}
 	}
 	
 	bool isPropertyAvailable(string Id) const {
@@ -2777,15 +2783,16 @@ public:
     UserProfile(int user_id, string uname, string pwd)
         : id(user_id), username(uname), password(pwd), is_logged_in(false) {}
 
-	 void login(const string& entered_username, const string& entered_password) {
+	void login(const string& entered_username, const string& entered_password) {
 	    ifstream input("userDatabase.txt");
 	
 	    if (!input.is_open()) {
 	        // Handle unable to open the file
 	        return;
 	    }
-	
+
 	    string line;
+	    bool loginSuccess = false;
 	    
 	    while (getline(input, line)) {
 	    	istringstream ss(line);
@@ -2794,26 +2801,29 @@ public:
 	        getline(ss, username, ',');
 	        getline(ss, password, ',');
 	        ss >> coins;
+	        ss.ignore(); // Ignore the comma
+	        ss >> is_logged_in;
 	        
 	        if (username == entered_username && password == entered_password) {
 	            is_logged_in = true;
-	            this->id = id; // Assign the id to the class member
-	            this->username = username;
-	            this->password = password;
-	            this->coins;
-	            
-	            Color::setTextColor(Color::BrightGreen);
-	            cout << "LoggedIn successfully." << endl; // If username and password exist
-	            Color::setTextColor(Color::White);
-	            countdown(1);
-	            loginCountdown(3);
-	            system("cls");
-	            return;
-	        } else {
-	            is_logged_in = false;
-	        }
+	            loginSuccess = true;
+	            setUserData(id, username, password, coins);
+	            break;
+	        } 
 	    }
 	    input.close();
+	    if (loginSuccess) {
+	        // Successful login actions
+            Color::setTextColor(Color::BrightGreen);
+            cout << "LoggedIn successfully." << endl; // If username and password exist
+            Color::setTextColor(Color::White);
+            countdown(1);
+            loginCountdown(3);
+            system("cls");
+            //updateUserIsLoggedIn(loginSuccess);
+	    } else {
+	        // Handle failed login
+	    }
 	}
 	
     void buyProperty(string propertyId) {
@@ -2830,8 +2840,7 @@ public:
                 coins -= propertyPrice;
                 ownedProperties.push_back(property);
                 updatePropertyAvailability(propertyId, false);
-                updateUserCoins(propertyId, coins);
-                saveUserToFile();
+                updateUserCoins(coins);
 
                 savePropertyToFile(propertyId, property);
                 Color::setTextColor(Color::BrightGreen);
@@ -2846,11 +2855,23 @@ public:
         }
     }
 	
+	void setUserData(int new_id, const string& new_username, const string& new_password, double new_coins) {
+	    id = new_id;
+	    username = new_username;
+	    password = new_password;
+	    coins = new_coins;
+	}
+	
     // Function to update user password
     void updateUserPassword(const string& new_password) {
         password = new_password;
         saveUserToFile(); // Save the updated password to file
     }
+    
+    void updateUserIsLoggedIn(bool login){
+    	is_logged_in = login;
+        saveUserToFile(); // Save the updated password to file
+	}
 	
     // Function to add REMS coins to the user's account
     void addRemsCoins(double additional_coins) {
@@ -3072,6 +3093,7 @@ public:
         countdown(1);
         logoutCountdown(3);
         system("cls");
+        //updateUserIsLoggedIn(is_logged_in);
     }
 	
     // Accessors (getters)
@@ -3159,7 +3181,7 @@ private:
 	    rename("temp.txt", "globalProperty.txt");
 	}
 
-    void updateUserCoins(string userId, double updatedCoins) {
+    void updateUserCoins(double updatedCoins) {
         coins = updatedCoins;
         saveUserToFile(); // Save the updated coins to file
     }
@@ -3179,7 +3201,7 @@ private:
             int file_id;
             string file_username, file_password;
             double file_coins;
-            int login;
+            bool islogin;
 
             ss >> file_id;
             ss.ignore();
@@ -3187,11 +3209,11 @@ private:
             getline(ss, file_password, ',');
             ss >> file_coins;
             cin.ignore();
-            ss >> login;
-
+            ss >> islogin;
+            
             if (file_id == id) {
                 // Update the line with new data
-                outFile << id << "," << username << "," << password << "," << coins << "," << login << endl;
+                outFile << id << "," << username << "," << password << "," << coins << "," << is_logged_in << endl;
             } else {
                 // Write the existing line as is
                 outFile << line << endl;
@@ -3722,6 +3744,7 @@ void registerUser() {
     string enteredUsername, enteredPassword, confirmPassword;
     double usercoin = 0;
     bool exist = false;
+    bool loggin = false;
     
     do {
         Color::setTextColor(Color::BrightCyan);
@@ -3768,7 +3791,7 @@ void registerUser() {
     int newId = generateUserUniqueID(); // Generate a unique ID
 
     ofstream reg("userDatabase.txt", ios::app);
-    reg << newId << "," << enteredUsername << "," << confirmPassword << "," << usercoin << "," << "0" << endl;
+    reg << newId << "," << enteredUsername << "," << confirmPassword << "," << usercoin << "," << loggin << endl;
     reg.close();
 
     system("cls");
