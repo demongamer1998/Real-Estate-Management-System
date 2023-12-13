@@ -2916,6 +2916,7 @@ public:
 	        	Color::setTextColor(Color::Red);
 	            cout << "Property not available." << endl;
 	        } else{
+	        	Color::setTextColor(Color::Red);
 	        	cout << "Property does not exist." << endl;
 			}
 			break;
@@ -4049,51 +4050,65 @@ void userLogin() {
 						    	cout << "Enter Property ID: ";
 						    	Color::setTextColor(Color::White);
 							}
-
-						    char ans;
-						    system("cls");
-						    while(true){
-							    Color::setTextColor(Color::BrightCyan);
-							    cout << "BUY A PROPERTY" << endl;
-							    user.showProfile(user.getId(),user.getUsername(),user.getPassword(),user.getCoins());
-						    	property.showPropertyById(propertyIdToBuy);
-						    	Color::setTextColor(Color::BrightYellow);
-						    	cout << "You will buy this property." << endl;
-						    	Color::setTextColor(Color::Yellow);
-						    	cout << "Do you want to continue? (Y/N) : ";
-						    	Color::setTextColor(Color::White);
-						    	cin>>ans;
-						    	
-						    	if(ans=='Y'||ans=='y'){
-									system("cls");
-						    		user.buyProperty(user.getId(),propertyIdToBuy);
-									countdown(1);
-									loginCountdown(3);
-						    		break;
-								}else if(ans=='N'||ans=='n'){
-									system("cls");
-									Color::setTextColor(Color::BrightGreen);
-									cout << "Buying property have been canceled.";
-									countdown(1);
-									loginCountdown(3);
-									break;
+							
+							bool isItExist = property.propertyIdExists(propertyIdToBuy);
+							
+							if(isItExist){
+								bool isItAvailable = property.isPropertyAvailable(propertyIdToBuy);
+								
+								if(isItAvailable){
+								    char ans;
+								    system("cls");
+								    while(true){
+									    Color::setTextColor(Color::BrightCyan);
+									    cout << "BUY A PROPERTY" << endl;
+									    user.showProfile(user.getId(),user.getUsername(),user.getPassword(),user.getCoins());
+								    	property.showPropertyById(propertyIdToBuy);
+								    	Color::setTextColor(Color::BrightYellow);
+								    	cout << "You will buy this property." << endl;
+								    	Color::setTextColor(Color::Yellow);
+								    	cout << "Do you want to continue? (Y/N) : ";
+								    	Color::setTextColor(Color::White);
+								    	cin>>ans;
+								    	
+								    	if(ans=='Y'||ans=='y'){
+											system("cls");
+								    		user.buyProperty(user.getId(),propertyIdToBuy);
+											countdown(1);
+											loginCountdown(3);
+								    		break;
+										}else if(ans=='N'||ans=='n'){
+											system("cls");
+											Color::setTextColor(Color::BrightGreen);
+											cout << "Buying property have been canceled.";
+											countdown(1);
+											loginCountdown(3);
+											break;
+										}else{
+											system("cls");
+								            Color::setTextColor(Color::Red);
+								            cout << "Invalid";
+								            Color::setTextColor(Color::White);
+											cout << " input. Please enter a ";
+								            Color::setTextColor(Color::BrightGreen);
+											cout << "valid ";
+											Color::setTextColor(Color::Yellow);
+											cout << "choice." << endl;
+									        Color::setTextColor(Color::BrightCyan);
+											continue;
+										}
+								    	
+									}
 								}else{
 									system("cls");
-						            Color::setTextColor(Color::Red);
-						            cout << "Invalid";
-						            Color::setTextColor(Color::White);
-									cout << " input. Please enter a ";
-						            Color::setTextColor(Color::BrightGreen);
-									cout << "valid ";
-									Color::setTextColor(Color::Yellow);
-									cout << "choice." << endl;
-							        Color::setTextColor(Color::BrightCyan);
-									continue;
+						        	Color::setTextColor(Color::Red);
+				            		cout << "Property not available." << endl;
 								}
-						    	
+							}else{
+								system("cls");
+					        	Color::setTextColor(Color::Red);
+					        	cout << "Property does not exist." << endl;
 							}
-							
-							
 						}
 	            		break;
 	            	case 4:
