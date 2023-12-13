@@ -963,6 +963,38 @@ public:
 	
 	    input.close();
 	}
+	
+		double getPriceOfProperty(string id) {
+	    ifstream input("globalProperty.txt");
+	    string propertyId, propertyType, propertyAddress, propertyLotTitle;
+	    string line;
+	    int bedrooms, bathrooms;
+	    double price, lotArea;
+	    bool isAvailable;
+	
+	    while (getline(input, line)) {
+	    	istringstream ss(line);
+	        getline(ss, propertyId, ',');
+	        getline(ss, propertyType, ',');
+	        getline(ss, propertyAddress, ',');
+	        getline(ss, propertyLotTitle, ',');
+	        ss >> bedrooms;
+	        ss.ignore(); // Ignore the comma
+	        ss >> bathrooms;
+	        ss.ignore(); // Ignore the comma
+	        ss >> lotArea;
+	        ss.ignore(); // Ignore the comma
+	        ss >> price;
+	        ss.ignore(); // Ignore the comma
+	        ss >> isAvailable;
+	        
+	        if(id == propertyId){
+	        return price;
+			}
+	    }
+	
+	    input.close();
+	}
     
 	void showPropertyById(string id) {
 	    ifstream input("globalProperty.txt");
@@ -2808,7 +2840,6 @@ public:
 	            is_logged_in = true;
 	            loginSuccess = true;
 	            setUserData(id, username, password, coins);
-	            break;
 	        } 
 	    }
 	    input.close();
@@ -2817,49 +2848,118 @@ public:
             Color::setTextColor(Color::BrightGreen);
             cout << "LoggedIn successfully." << endl; // If username and password exist
             Color::setTextColor(Color::White);
+            cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             countdown(1);
             loginCountdown(3);
+            updateUserIsLoggedIn(loginSuccess);
             system("cls");
-            //updateUserIsLoggedIn(loginSuccess);
+
 	    } else {
 	        // Handle failed login
 	    }
 	}
 	
-    void buyProperty(string propertyId) {
-		string propertyType, propertyAddress, propertyLotTitle ; 
-		int bedrooms, bathrooms; 
-		double price, lotArea;
+    void buyProperty(int userId ,string propertyId) {
+    	while(true){
+	  		string propertyType, propertyAddress, propertyLotTitle ; 
+			int bedrooms, bathrooms; 
+			double price, lotArea;
+			
+			RealEstateProperty property(propertyType, propertyAddress, propertyLotTitle, bedrooms, bathrooms, lotArea,price);
+			property.readPropertyById(propertyId);
+			readUserProfileById(userId);
+	        // Check if property exists and is available
+	        if (propertyExists(propertyId) && property.isPropertyAvailable(propertyId)) {
+	            double propertyPrice = property.getPriceOfProperty(propertyId);
+			    ifstream input("userDatabase.txt");
+			
+			    if (!input.is_open()) {
+			        // Handle unable to open the file
+			        return;
+			    }
 		
-		RealEstateProperty property(propertyType, propertyAddress, propertyLotTitle, bedrooms, bathrooms, lotArea,price);
-		property.readPropertyById(propertyId);
-        // Check if property exists and is available
-        if (propertyExists(propertyId) && property.isPropertyAvailable(propertyId)) {
-            double propertyPrice = property.getPrice();
-            if (coins >= propertyPrice) {
-                coins -= propertyPrice;
-                ownedProperties.push_back(property);
-                updatePropertyAvailability(propertyId, false);
-                updateUserCoins(coins);
-
-                savePropertyToFile(propertyId, property);
-                Color::setTextColor(Color::BrightGreen);
-                cout << "Property purchased successfully!" << endl;
-            } else {
-            	Color::setTextColor(Color::BrightRed);
-                cout << "Insufficient coins to purchase the property." << endl;
-            }
-        } else {
-        	Color::setTextColor(Color::Red);
-            cout << "Property not available or does not exist." << endl;
-        }
-    }
+			    string line;
+			    bool loginSuccess = false;
+			    
+			    while (getline(input, line)) {
+			    	istringstream ss(line);
+			    	ss >> id;
+			        ss.ignore(); // Ignore the comma
+			        getline(ss, username, ',');
+			        getline(ss, password, ',');
+			        ss >> coins;
+			        ss.ignore(); // Ignore the comma
+			        ss >> is_logged_in;
+			        
+			        if (userId == id) {
+					    id=id;
+					    username=username;
+					    password=password;
+					    coins=coins;
+					    is_logged_in=is_logged_in;
+			            setUserData(id, username, password, coins);
+			        } 
+			    }
+			    input.close();
+	            if (getCoins()>= propertyPrice) {
+	                ownedProperties.push_back(property);
+	                updatePropertyAvailability(propertyId, false);
+	                updateUserCoins(propertyPrice);
+	                savePropertyToFile(propertyId, property);
+	                Color::setTextColor(Color::BrightGreen);
+	                cout << "Property purchased successfully!" << endl;
+	            } else {
+	            	Color::setTextColor(Color::BrightRed);
+	                cout << "Insufficient coins to purchase the property." << endl;
+	            }
+	        }else if(propertyExists(propertyId) && !(property.isPropertyAvailable(propertyId))){
+	        	Color::setTextColor(Color::Red);
+	            cout << "Property not available." << endl;
+	        } else{
+	        	cout << "Property does not exist." << endl;
+			}
+			break;
+		}
+	}
 	
 	void setUserData(int new_id, const string& new_username, const string& new_password, double new_coins) {
 	    id = new_id;
 	    username = new_username;
 	    password = new_password;
 	    coins = new_coins;
+	}
+	
+	
+	void readUserProfileById(int id){
+        ifstream inFile("userDatabase.txt");
+
+        if (!inFile.is_open() ){
+            // Handle unable to open the file
+            return;
+        }
+
+        string line;
+        while (getline(inFile, line)) {
+            istringstream ss(line);
+            int file_id;
+            string file_username, file_password;
+            double file_coins;
+            bool islogin;
+
+            ss >> file_id;
+            getline(ss, file_username, ',');
+            getline(ss, file_password, ',');
+            ss >> file_coins;
+            ss >> islogin;
+            
+            if (file_id == id) {
+			    id=file_id;
+			    username=file_username;
+			    password=file_password;
+			    coins=file_coins;
+			    is_logged_in=islogin;
+            } 
+        }
 	}
 	
     // Function to update user password
@@ -2870,7 +2970,7 @@ public:
     
     void updateUserIsLoggedIn(bool login){
     	is_logged_in = login;
-        saveUserToFile(); // Save the updated password to file
+    	saveUserToFile();
 	}
 	
     // Function to add REMS coins to the user's account
@@ -2910,7 +3010,7 @@ public:
 					cout << "] ";
 					Color::setTextColor(Color::White);
 					cout << "only.\n";
-		            showProfile(getId()); // If logged in successfully, show user profile
+		            showProfile(getId(),getUsername(),getPassword(),getCoins()); // If logged in successfully, show user profile
 		            // Display menu options
 		            Color::setTextColor(Color::BrightCyan);
 		            cout << "[";
@@ -2999,7 +3099,7 @@ public:
 					cout << "] ";
 					Color::setTextColor(Color::White);
 					cout << "only.\n";
-		            showProfile(getId()); // If logged in successfully, show user profile
+		            showProfile(getId(),getUsername(),getPassword(),getCoins()); // If logged in successfully, show user profile
 		            // Display menu options
 		            Color::setTextColor(Color::BrightCyan);
 		            cout << "[";
@@ -3062,8 +3162,35 @@ public:
     	cout<<fixed<<setprecision(2)<<newCoins<<endl;
 	}
     
-    void showProfile(int userId){
+    void showProfile(int userId, string username, string password, double coins){
+	    ifstream input("userDatabase.txt");
+	
+	    if (!input.is_open()) {
+	        // Handle unable to open the file
+	        return;
+	    }
 
+	    string line;
+	    bool loginSuccess = false;
+	    
+	    while (getline(input, line)) {
+	    	istringstream ss(line);
+	    	ss >> id;
+	        ss.ignore(); // Ignore the comma
+	        getline(ss, username, ',');
+	        getline(ss, password, ',');
+	        ss >> coins;
+	        ss.ignore(); // Ignore the comma
+	        ss >> is_logged_in;
+	        
+	        if (username == username && password == password) {
+	            is_logged_in = true;
+	            loginSuccess = true;
+	            setUserData(id, username, password, coins);
+	        } 
+	    }
+	    input.close();
+	    
     	Color::setTextColor(Color::Cyan);
     	cout<<"USER PROFILE"<<endl;
 		Color::setTextColor(Color::BrightYellow);
@@ -3075,13 +3202,13 @@ public:
     	Color::setTextColor(Color::Yellow);
     	cout<<"USERNAME: ";
     	Color::setTextColor(Color::BrightYellow);
-    	cout<<getUsername()<<endl;
+    	cout<<username<<endl;
     	Color::setTextColor(Color::Yellow);
     	cout<<"REMS COINS: ";
     	Color::setTextColor(Color::Red);
     	cout<<"PHP ";
     	Color::setTextColor(Color::BrightYellow);
-    	cout<<fixed<<setprecision(2)<<getCoins()<<endl;
+    	cout<<fixed<<setprecision(2)<<coins<<endl;
 		Color::setTextColor(Color::BrightYellow);           
 		cout << "---------------------------------" << endl;			
 	}
@@ -3093,7 +3220,7 @@ public:
         countdown(1);
         logoutCountdown(3);
         system("cls");
-        //updateUserIsLoggedIn(is_logged_in);
+        updateUserIsLoggedIn(is_logged_in);
     }
 	
     // Accessors (getters)
@@ -3182,7 +3309,7 @@ private:
 	}
 
     void updateUserCoins(double updatedCoins) {
-        coins = updatedCoins;
+        coins -= updatedCoins;
         saveUserToFile(); // Save the updated coins to file
     }
 
@@ -3204,11 +3331,9 @@ private:
             bool islogin;
 
             ss >> file_id;
-            ss.ignore();
             getline(ss, file_username, ',');
             getline(ss, file_password, ',');
             ss >> file_coins;
-            cin.ignore();
             ss >> islogin;
             
             if (file_id == id) {
@@ -3828,7 +3953,7 @@ void userLogin() {
         if (user.isLoggedIn()) {
         	bool exitRequested = false;
 			while(!exitRequested){
-	            user.showProfile(user.getId()); // If logged in successfully, break out of the loop
+	            user.showProfile(user.getId(),user.getUsername(),user.getPassword(),user.getCoins()); // If logged in successfully, break out of the loop
 	            Color::setTextColor(Color::BrightCyan);
 	            cout << "[";
 	            Color::setTextColor(Color::BrightRed);
@@ -3915,7 +4040,7 @@ void userLogin() {
 	            			string propertyIdToBuy;
 						    Color::setTextColor(Color::BrightCyan);
 						    cout << "BUY A PROPERTY" << endl;
-						    user.showProfile(user.getId());
+						    user.showProfile(user.getId(),user.getUsername(),user.getPassword(),user.getCoins());
 						    Color::setTextColor(Color::Yellow);
 						    cout << "Enter Property ID: ";
 						    Color::setTextColor(Color::White);
@@ -3927,10 +4052,10 @@ void userLogin() {
 
 						    char ans;
 						    system("cls");
-						    do{
+						    while(true){
 							    Color::setTextColor(Color::BrightCyan);
 							    cout << "BUY A PROPERTY" << endl;
-							    user.showProfile(user.getId());
+							    user.showProfile(user.getId(),user.getUsername(),user.getPassword(),user.getCoins());
 						    	property.showPropertyById(propertyIdToBuy);
 						    	Color::setTextColor(Color::BrightYellow);
 						    	cout << "You will buy this property." << endl;
@@ -3941,7 +4066,7 @@ void userLogin() {
 						    	
 						    	if(ans=='Y'||ans=='y'){
 									system("cls");
-						    		user.buyProperty(propertyIdToBuy);
+						    		user.buyProperty(user.getId(),propertyIdToBuy);
 									countdown(1);
 									loginCountdown(3);
 						    		break;
@@ -3966,7 +4091,7 @@ void userLogin() {
 									continue;
 								}
 						    	
-							}while(true);
+							}
 							
 							
 						}
@@ -3979,7 +4104,7 @@ void userLogin() {
 									Color::setTextColor(Color::BrightCyan);
 		        					cout << "EDIT MY ACCOUNT"<<endl;
 		        					Color::setTextColor(Color::BrightYellow);
-						            user.showProfile(user.getId()); // If logged in successfully, break out of the loop
+						            user.showProfile(user.getId(),user.getUsername(),user.getPassword(),user.getCoins()); // If logged in successfully, break out of the loop
 						            Color::setTextColor(Color::BrightCyan);
 						            cout << "[";
 						            Color::setTextColor(Color::BrightRed);
@@ -4015,7 +4140,7 @@ void userLogin() {
 												Color::setTextColor(Color::BrightCyan);
 												cout << "TOP UP REMS COINS" << endl;	
 												do {
-													user.showProfile(user.getId());
+													user.showProfile(user.getId(),user.getUsername(),user.getPassword(),user.getCoins());
 												    Color::setTextColor(Color::Yellow);
 												    cout << "Enter coins amount ";
 												    Color::setTextColor(Color::BrightCyan);
@@ -4105,7 +4230,7 @@ void userLogin() {
 												Color::setTextColor(Color::BrightCyan);
 												cout << "CHANGE PASSWORD" << endl;
 						            			do{
-													user.showProfile(user.getId());
+													user.showProfile(user.getId(),user.getUsername(),user.getPassword(),user.getCoins());
 												    Color::setTextColor(Color::Yellow);
 												    cout << "Enter current password: ";
 												    Color::setTextColor(Color::White);
@@ -4124,7 +4249,7 @@ void userLogin() {
 												do{
 													Color::setTextColor(Color::BrightCyan);
 													cout << "CHANGE PASSWORD" << endl;
-													user.showProfile(user.getId());
+													user.showProfile(user.getId(),user.getUsername(),user.getPassword(),user.getCoins());
 												    Color::setTextColor(Color::Yellow);
 												    cout << "Enter new password: ";
 												    Color::setTextColor(Color::White);
@@ -4152,7 +4277,7 @@ void userLogin() {
 													system("cls");
 													Color::setTextColor(Color::BrightCyan);
 													cout << "CHANGE PASSWORD" << endl;
-													user.showProfile(user.getId());
+													user.showProfile(user.getId(),user.getUsername(),user.getPassword(),user.getCoins());
 													char ans;
 													Color::setTextColor(Color::BrightYellow);
 													cout << "Your password will be changed." << endl;

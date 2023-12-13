@@ -1,2 +1,2 @@
-1,Single-Family Home,123 Main Street Anytown USA,Serene Haven,5,2,12001,1.5e+007,0
-2,Residential,Marikina City,Haven Shane,5,3,1001,1.5e+006,0
+1,Single-Family Home,123 Main Street Anytown USA,Serene Haven,5,2,12001,1.5e+007,1
+3,Residential,Marikina City,Haven At Works,5,2,10012,5e+006,1
