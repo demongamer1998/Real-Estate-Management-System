@@ -964,7 +964,7 @@ public:
 	    input.close();
 	}
 	
-		double getPriceOfProperty(string id) {
+	double getPriceOfProperty(string id) {
 	    ifstream input("globalProperty.txt");
 	    string propertyId, propertyType, propertyAddress, propertyLotTitle;
 	    string line;
@@ -990,11 +990,11 @@ public:
 	        
 	        if(id == propertyId){
 	        return price;
-			}
-	    }
-	
-	    input.close();
-	}
+		}
+    }
+
+    input.close();
+}
     
 	void showPropertyById(string id) {
 	    ifstream input("globalProperty.txt");
@@ -2745,8 +2745,8 @@ public:
 	
 	    while (input >> id) {
 	        if (id == idToCheck) {
-	            input.close();
 	            return true; // ID exists in the database
+	            input.close();
 	        }
 	        // Skip the rest of the line
 	        input.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -2781,11 +2781,10 @@ public:
 	        ss >> isAvailable;
 	        
 	        if (propertyId == idToCheck) {
-	            input.close();
 	            return true; // ID exists in the database
+	            input.close();
+	            break;
 	        }
-	        // Skip the rest of the line
-	        input.ignore(numeric_limits<streamsize>::max(), '\n');
 	    }
 	    input.close();
 	    return false; // ID doesn't exist in the database
